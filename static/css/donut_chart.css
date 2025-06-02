@@ -1,0 +1,75 @@
+/* 
+ * Magellan EV Tracker - Donut Chart Visualization Styles
+ * Version: 1.33
+ *
+ * This file adds non-invasive CSS styles for the donut chart visualization
+ * without modifying any existing styling or functionality.
+ */
+
+/* Donut Chart Container */
+.donut-chart-container {
+    background-color: var(--secondary-bg);
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 20px;
+    position: relative;
+    width: 250px;
+    height: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    float: left;
+    margin-right: 20px;
+}
+
+/* Chart Title */
+.chart-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-light);
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* Center Text Positioning */
+.chart-center-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    pointer-events: none;
+}
+
+/* Progress Percentage Display */
+.progress-percentage {
+    display: block;
+    font-size: 24px;
+    font-weight: 700;
+    color: #4CAF50;
+}
+
+/* Progress Label */
+.progress-label {
+    display: block;
+    font-size: 14px;
+    color: var(--text-light);
+    opacity: 0.8;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .donut-chart-container {
+        float: none;
+        margin-right: 0;
+        width: 100%;
+        height: 220px;
+    }
+}
+
+/* Clear fix for floating elements */
+.dashboard-container:after {
+    content: "";
+    display: table;
+    clear: both;
+}
