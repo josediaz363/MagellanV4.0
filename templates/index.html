@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Magellan EV - Dashboard{% endblock %}
+
+{% block content %}
+    <div class="navbar">
+        <div class="d-flex justify-content-between align-items-center w-100">
+            <h2>Project Dashboard</h2>
+            <div>
+                <select class="form-select bg-dark text-light" id="projectSelector">
+                    <option value="all">All Projects</option>
+                    {% for project in projects %}
+                        <option value="{{ project.id }}">{{ project.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Layout with Donut Chart and Metrics -->
+    <div class="dashboard-container">
+        <!-- Overall Progress Donut Chart -->
+        <div class="chart-container">
+            <h4 class="chart-title">Overall Progress</h4>
+            <canvas id="overallProgressChart"></canvas>
+            <div class="chart-center-text">
+                <span class="progress-percentage">{{ overall_progress|round|int }}%</span>
+                <span class="progress-label">Complete</span>
+            </div>
+        </div>
+        
+        <!-- Progress Metrics -->
+        <div class="dashboard-metrics-grid">
+            <div class="metric-card">
+                <div class="title">To Date Actual % Complete</div>
+                <div class="value" style="color: var(--accent-green);">{{ overall_progress|round(1) }}%</div>
+            </div>
+            <div class="metric-card">
+                <div class="title">To Date Plan % Complete</div>
+                <div class="value" style="color: var(--accent-green);">0.0%</div>
+            </div>
+            <div class="metric-card">
+                <div class="title">Weekly Actual % Complete</div>
+                <div class="value" style="color: var(--accent-green);">0.0%</div>
+            </div>
+            <div class="metric-card">
+                <div class="title">Weekly Plan % Complete</div>
+                <div class="value" style="color: var(--accent-green);">0.0%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Work Items Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="data-table">
+                <div class="title">Recent Work Items</div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Work Item</th>
+                                <th>Cost Code</th>
+                                <th>Budgeted Hours</th>
+                                <th>Earned Hours</th>
+                                <th>Progress</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in work_items %}
+                            <tr>
+                                <td>{{ item.description }}</td>
+                                <td>{{ item.cost_code.cost_code_id_str if item.cost_code else 'N/A' }}</td>
+                                <td>{{ item.budgeted_man_hours }}</td>
+                                <td>{{ (item.budgeted_man_hours * item.percent_complete_hours / 100)|round(1) if item.budgeted_man_hours else 0.0 }}</td>
+                                <td>{{ item.percent_complete_hours|round(1) }}%</td>
+                                <td>
+                                    <a href="{{ url_for('main.view_work_item', work_item_id=item.id) }}" class="btn btn-sm btn-outline-light">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center">No work items available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Overall Progress Donut Chart
+        const progressCtx = document.getElementById('overallProgressChart').getContext('2d');
+        const overallProgress = {{ overall_progress|default(0)|round|int }};
+        
+        new Chart(progressCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Complete', 'Remaining'],
+                datasets: [{
+                    data: [overallProgress, 100 - overallProgress],
+                    backgroundColor: ['#4CAF50', '#2c3034'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                cutout: '75%',
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.label + ': ' + context.raw + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Project selector functionality
+        document.getElementById('projectSelector').addEventListener('change', function() {
+            const projectId = this.value;
+            if (projectId === 'all') {
+                window.location.href = "{{ url_for('main.index') }}";
+            } else {
+                window.location.href = "{{ url_for('main.index') }}?project_id=" + projectId;
+            }
+        });
+        
+        // Set the selected project if there's a project_id in the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectId = urlParams.get('project_id');
+        if (projectId) {
+            document.getElementById('projectSelector').value = projectId;
+        }
+    });
+</script>
+{% endblock %}
